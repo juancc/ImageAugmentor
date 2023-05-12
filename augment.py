@@ -19,6 +19,9 @@ import cv2
 from tqdm import tqdm
 
 from ImageAugmentations.Background import background
+from ImageAugmentations.Affine import affine
+
+
 
 
 
@@ -55,12 +58,22 @@ def augment(path, childs):
         im = cv2.imread(str(filepath))
 
         for c in range(childs):
+            # Affine
+            src = affine(im)
+            
+
+
+            # Background replace
             bck_filepath = os.path.join(BACKGROUND_PATH, random.choice(backgrounds))
             bck = cv2.imread(bck_filepath)
-            aug = background(im, bck)*255
+            aug = background(src, bck)*255
 
-            out_filepath = os.path.join(output_dir, filepath.name+f'-{c}')
+
+            out_filepath = os.path.join(output_dir, filepath.name+f'-{c}.png')
             cv2.imwrite(out_filepath, aug)
+
+
+        return
 
         # except Exception as e:
         #     err.append(str(filepath))
