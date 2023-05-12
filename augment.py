@@ -18,7 +18,7 @@ import random
 import cv2
 from tqdm import tqdm
 
-from ImageAugmentations.Background import background
+from ImageAugmentations.Color import background
 from ImageAugmentations.Affine import affine
 
 
@@ -34,9 +34,11 @@ parser = argparse.ArgumentParser(
                     description='Perform image transformations for data augmentation')
 
 parser.add_argument('dataset', help='Path to dataset')
-parser.add_argument('-c', '--childs', help='Number of random variations per source file', default=3) 
+parser.add_argument('-c', '--childs', help='Number of random variations per source file', default=3)
+parser.add_argument('-s', '--size', help='Fix square output image size', default=0) 
 
-def augment(path, childs):
+
+def augment(path, childs, target_size):
     """
     : path (Str) : path to dataset
     """
@@ -53,30 +55,30 @@ def augment(path, childs):
 
     for filepath in tqdm(Path(path).glob('**/*')):
         err = []
-        # try:
+        try:
 
-        im = cv2.imread(str(filepath))
+            im = cv2.imread(str(filepath))
 
-        for c in range(childs):
-            # Affine
-            src = affine(im)
-            
-
-
-            # Background replace
-            bck_filepath = os.path.join(BACKGROUND_PATH, random.choice(backgrounds))
-            bck = cv2.imread(bck_filepath)
-            aug = background(src, bck)*255
-
-
-            out_filepath = os.path.join(output_dir, filepath.name+f'-{c}.png')
-            cv2.imwrite(out_filepath, aug)
+            childs = int(childs)
+            for c in range(childs):
+                # Affine
+                src = affine(im)
+                
+                # Background replace
+                bck_filepath = os.path.join(BACKGROUND_PATH, random.choice(backgrounds))
+                bck = cv2.imread(bck_filepath)
+                aug = background(src, bck, add_noise=True)*255
 
 
-        return
+                out_filepath = os.path.join(output_dir, filepath.name+f'-{c}.png')
+                target_size = int(target_size)
+                if target_size>0:
+                    aug = cv2.resize(aug, ([target_size]*2), interpolation= cv2.INTER_LINEAR)
 
-        # except Exception as e:
-        #     err.append(str(filepath))
+                cv2.imwrite(out_filepath, aug)
+
+        except Exception as e:
+            err.append(str(filepath))
 
 
 
@@ -87,4 +89,4 @@ def augment(path, childs):
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    augment(args.dataset, args.childs)
+    augment(args.dataset, args.childs, args.size)
