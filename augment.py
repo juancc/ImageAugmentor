@@ -35,10 +35,12 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('dataset', help='Path to dataset')
 parser.add_argument('-c', '--childs', help='Number of random variations per source file', default=3)
-parser.add_argument('-s', '--size', help='Fix square output image size', default=0) 
+parser.add_argument('-s', '--size', help='Fix square output image size', default=0)
+parser.add_argument('-q', '--quality', help='Output file image quality', default=90) 
 
 
-def augment(path, childs, target_size):
+
+def augment(path, childs, target_size, quality):
     """
     : path (Str) : path to dataset
     """
@@ -67,15 +69,15 @@ def augment(path, childs, target_size):
                 # Background replace
                 bck_filepath = os.path.join(BACKGROUND_PATH, random.choice(backgrounds))
                 bck = cv2.imread(bck_filepath)
-                aug = background(src, bck, add_noise=True)*255
+                aug = background(src, bck, add_noise=True, flip=True)*255
 
-
-                out_filepath = os.path.join(output_dir, filepath.name+f'-{c}.png')
+                out_filename = f'{filepath.name.split(".")[0]} aug-{c}.jpg'
+                out_filepath = os.path.join(output_dir, out_filename)
                 target_size = int(target_size)
                 if target_size>0:
                     aug = cv2.resize(aug, ([target_size]*2), interpolation= cv2.INTER_LINEAR)
 
-                cv2.imwrite(out_filepath, aug)
+                cv2.imwrite(out_filepath, aug, [int(cv2.IMWRITE_JPEG_QUALITY), int(quality)])
 
         except Exception as e:
             err.append(str(filepath))
@@ -89,4 +91,4 @@ def augment(path, childs, target_size):
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    augment(args.dataset, args.childs, args.size)
+    augment(args.dataset, args.childs, args.size, args.quality)

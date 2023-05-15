@@ -17,7 +17,7 @@ def affine(im, max_angle=360):
     :im (np.array) : Image to rotate
     """
     # Scale for width and height deformation
-    sy = max(random.random()*2,0.4)
+    sy = max(random.random()*1.2, 0.5)
     im = cv2.resize(im, None, fx=1, fy=sy, interpolation= cv2.INTER_LINEAR)
 
 
@@ -29,7 +29,7 @@ def affine(im, max_angle=360):
 
     # Rotate and scale
     angle = random.randrange(0,max_angle)
-    scale = max(random.random(),0.2)
+    scale = max(random.random(),0.6)
     M = cv2.getRotationMatrix2D((cx, cy), angle, scale)
     im = cv2.warpAffine(im, M, (w, h), borderValue=(255,255,255))
 
