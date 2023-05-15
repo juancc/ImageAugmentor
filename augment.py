@@ -52,8 +52,8 @@ def augment(path, childs, target_size):
     print(f'    - Output directory: {output_dir}')
 
     backgrounds = os.listdir(BACKGROUND_PATH)
-
-    for filepath in tqdm(Path(path).glob('**/*')):
+    files = list(Path(path).glob('**/*'))
+    for filepath in tqdm(files, total=len(files)):
         err = []
         try:
 
